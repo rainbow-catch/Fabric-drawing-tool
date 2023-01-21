@@ -109,14 +109,14 @@
         });
 
         $("#mainBranchParent").click(function () {
-            var width = self.UNIT * 2 * $('#colNum').val()+ self.UNIT;
-            var height = self.UNIT * $('#rowNum').val()+ self.UNIT;
+            var width = self.UNIT * 2 * $('#colNum').val();
+            var height = self.UNIT * $('#rowNum').val();
             if(width && height) {
                 var shape = new fabric.Rect({
-                    left: 4 * self.UNIT + self.UNIT * 12 * self.count.mainBranchParent - 0.5 * self.UNIT,
-                    top: 2 * self.UNIT - 0.5 * self.UNIT,
-                    width,
-                    height,
+                    left: 6 * self.UNIT + self.UNIT * 12 * self.count.mainBranchParent - 0.5 * self.UNIT,
+                    top: 3 * self.UNIT - 0.5 * self.UNIT,
+                    width: width + self.UNIT,
+                    height: height + self.UNIT,
                     paintFirst: 'stroke',
                     stroke: self.paintColor.mainBranch,
                     strokeWidth: 3,
@@ -133,14 +133,14 @@
             
         });
         $("#childBranchParent").click(function () {
-            var width = self.UNIT * 2 * $('#colNum').val()+ 0.6 * self.UNIT;
-            var height = self.UNIT * $('#rowNum').val()+ 0.6 * self.UNIT;
+            var width = self.UNIT * 2 * $('#colNum').val();
+            var height = self.UNIT * $('#rowNum').val();
             if(width && height) {
                 var shape = new fabric.Rect({
                     left: 6 * self.UNIT - 0.3 * self.UNIT,
                     top: 3 * self.UNIT + self.UNIT * 4 * self.count.childBranchParent - 0.3 * self.UNIT,
-                    width,
-                    height,
+                    width: width + 0.6 * self.UNIT,
+                    height: height + 0.6 * self.UNIT,
                     paintFirst: 'stroke',
                     stroke: self.paintColor.childBranch,
                     strokeWidth: 3,
