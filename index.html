@@ -9,11 +9,13 @@
             padding: 5px;
         }
 
-        button#clear {
-            margin-top: 50px;
+        #main {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
         }
-
         #drawingArea {
+            width: 90%;
             max-width: fit-content;
             height: max-content;
             margin: 10px;
@@ -23,40 +25,41 @@
 
         #controlArea {
             display: flex;
-            flex-direction: column;
-            justify-content: center;
+            justify-content: space-between;
         }
     </style>
 </head>
 
 <body>
-    <div style="display: flex;">
+    <div id="main">
         <!-- Drawing Area -->
         <div id="drawingArea">
-            <canvas id="gridDrawing" width="500" height="500"></canvas>
+            <canvas id="gridDrawing" width="1000" height="600"></canvas>
         </div>
 
+        <div>
+            <label>Col Width</label> <input type="number" id="colNum"/>
+            <label>Row Width</label> <input type="number" id="rowNum"/>
+        </div>
         <!-- Control Area -->
         <div id="controlArea">
             <!-- Control Buttons -->
-            <button id="mainBranchParent">mainBranchParent</button><br>
-            <button id="childBranchParent">childeBranchParent</button><br>
-            <button id="rectangle">rectangle</button><br>
-            <button id="treeBranch">treeBranch</button><br>
-            <button id="childBranch">childBranch</button><br><br><br>
-
-            <!-- Remove Button -->
-            <button id="clear">Clear selected</button><br><br>
-            <br />
+            <button id="mainBranchParent">MainBranchParent</button>
+            <button id="childBranchParent">ChildeBranchParent</button>
+            <button id="rectangle">Rectangle</button>
+            <button id="treeBranch">TreeBranch</button>
+            <button id="childBranch">ChildBranch</button>
         </div>
+        <!-- Remove Button -->
+        <button id="clear">Clear selected</button>
     </div>
 </body>
 
 <script>
     function GridDrawing() {
         var self = this;
-        self.UNIT = 10;
-        self.GRID_DIMENSIONS = 500;
+        self.UNIT = 20;
+        self.GRID_DIMENSIONS = 1000;
 
         self.boardCanvas;
         self.selectedShape = null;
@@ -100,46 +103,60 @@
             if (object) {
                 self.boardCanvas.sendToBack(object);
                 self.selectedShape = options.target;
-                self.selectedShape.borderColor = 'blue';
+                self.selectedShape.borderColor = '#1f90ff';
             }
         });
 
         $("#mainBranchParent").click(function () {
-            var shape = new fabric.Rect({
-                left: 4 * self.UNIT + self.UNIT * 12 * self.count.mainBranchParent,
-                top: 2 * self.UNIT,
-                width: self.UNIT * 12,
-                height: self.UNIT * 14,
-                paintFirst: 'stroke',
-                stroke: self.paintColor.mainBranch,
-                strokeWidth: 2,
-                fill: null
-            });
-            shape.setControlVisible('mtr', false);
-            self.count.mainBranchParent++;
-            self.boardCanvas.add(shape);
-            self.boardCanvas.renderAll();
+            var width = self.UNIT * 2 * $('#colNum').val();
+            var height = self.UNIT * $('#rowNum').val();
+            if(width && height) {
+                var shape = new fabric.Rect({
+                    left: 4 * self.UNIT + self.UNIT * 12 * self.count.mainBranchParent,
+                    top: 2 * self.UNIT,
+                    width,
+                    height,
+                    paintFirst: 'stroke',
+                    stroke: self.paintColor.mainBranch,
+                    strokeWidth: 2,
+                    fill: null,
+                    hasControls: false,
+                    padding: self.UNIT / 3
+                });
+                shape.setControlVisible('mtr', false);
+                self.count.mainBranchParent++;
+                self.boardCanvas.add(shape);
+                self.boardCanvas.renderAll();
+            }
+            else alert('Please input column and row width');
+            
         });
         $("#childBranchParent").click(function () {
-            var shape = new fabric.Rect({
-                left: 6 * self.UNIT,
-                top: 3 * self.UNIT + self.UNIT * 4 * self.count.childBranchParent,
-                width: self.UNIT * 9,
-                height: self.UNIT * 4,
-                paintFirst: 'stroke',
-                stroke: self.paintColor.childBranch,
-                strokeWidth: 2,
-                fill: null
-            });
-            shape.setControlVisible('mtr', false);
-            self.count.childBranchParent++;
-            self.boardCanvas.add(shape);
-            self.boardCanvas.renderAll();
+            var width = self.UNIT * 2 * $('#colNum').val();
+            var height = self.UNIT * $('#rowNum').val();
+            if(width && height) {
+                var shape = new fabric.Rect({
+                    left: 6 * self.UNIT,
+                    top: 3 * self.UNIT + self.UNIT * 4 * self.count.childBranchParent,
+                    width,
+                    height,
+                    paintFirst: 'stroke',
+                    stroke: self.paintColor.childBranch,
+                    strokeWidth: 2,
+                    fill: null,
+                    hasControls: false,
+                    padding: self.UNIT / 3
+                });
+                self.count.childBranchParent++;
+                self.boardCanvas.add(shape);
+                self.boardCanvas.renderAll();
+            }
+            else alert('Please input column and row width');
         });
 
         $("#rectangle").click(function () {
             var shape = new fabric.Rect({
-                left: 9 * self.UNIT,
+                left: 10 * self.UNIT,
                 top: 4 * self.UNIT + self.UNIT * 4 * self.count.rectangle,
                 width: self.UNIT * 4,
                 height: self.UNIT * 2,
@@ -147,7 +164,8 @@
                 hasControls: false,
                 stroke: self.paintColor.rectangle,
                 strokeWidth: 2,
-                fill: null
+                fill: null,
+                padding: self.UNIT / 3
             });
             self.count.rectangle++;
             self.boardCanvas.add(shape);
@@ -157,9 +175,9 @@
         $("#treeBranch").click(function () {
             var shape = new fabric.Line(
                 [
-                    5 * self.UNIT + self.UNIT * 12 * self.count.treeBranch,
+                    6 * self.UNIT + self.UNIT * 12 * self.count.treeBranch,
                     3 * self.UNIT,
-                    5 * self.UNIT + self.UNIT * 12 * self.count.treeBranch,
+                    6 * self.UNIT + self.UNIT * 12 * self.count.treeBranch,
                     15 * self.UNIT
                 ],
                 {
@@ -177,9 +195,9 @@
         $("#childBranch").click(function () {
             var shape = new fabric.Line(
                 [
-                    5 * self.UNIT,
+                    6 * self.UNIT,
                     5 * self.UNIT + self.UNIT * 4 * self.count.childBranch,
-                    9 * self.UNIT,
+                    10 * self.UNIT,
                     5 * self.UNIT + self.UNIT * 4 * self.count.childBranch,
                 ],
                 {
@@ -202,8 +220,8 @@
 
         // Draw Gridline
         var linesCount = self.GRID_DIMENSIONS / self.UNIT;
-        for (var lineIndex = 0; lineIndex < linesCount; lineIndex += 2) {
-            self.boardCanvas.add(new fabric.Line([lineIndex * self.UNIT, 0, lineIndex * self.UNIT, self.GRID_DIMENSIONS], { stroke: '#ccc', selectable: false }));
+        for (var lineIndex = 0; lineIndex < linesCount; lineIndex ++) {
+            self.boardCanvas.add(new fabric.Line([lineIndex * self.UNIT * 2, 0, lineIndex * self.UNIT * 2, self.GRID_DIMENSIONS], { stroke: '#ccc', selectable: false }));
             self.boardCanvas.add(new fabric.Line([0, lineIndex * self.UNIT, self.GRID_DIMENSIONS, lineIndex * self.UNIT], { stroke: '#ccc', selectable: false }));
         }
     }
@@ -258,7 +276,7 @@
             left: left,
             top: top,
             hasControls: false,
-            padding: self.UNIT / 2,
+            padding: self.UNIT / 3,
             hasRotatingPoint: false,
         });
         self.boardCanvas.add(group);
@@ -269,7 +287,7 @@
     GridDrawing.prototype.getScaledCellCoordinates = function (left, top) {
         var self = this;
         var squaredCoordinates = {};
-        squaredCoordinates.left = Math.ceil(left / self.UNIT) * self.UNIT;
+        squaredCoordinates.left = Math.ceil(left / self.UNIT / 2) * self.UNIT * 2;
         squaredCoordinates.top = Math.ceil(top / self.UNIT) * self.UNIT;
         return squaredCoordinates;
     }
