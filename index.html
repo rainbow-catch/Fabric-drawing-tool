@@ -1,0 +1,305 @@
+<html>
+
+<head>
+    <script src="fabric.js"></script>
+    <script src="jquery.js"></script>
+    <style>
+        button {
+            margin: 5px;
+            padding: 5px;
+        }
+
+        button#clear {
+            margin-top: 50px;
+        }
+
+        #drawingArea {
+            max-width: fit-content;
+            height: max-content;
+            margin: 10px;
+            overflow: auto;
+            border: 1px solid #ccc;
+        }
+
+        #controlArea {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+    </style>
+</head>
+
+<body>
+    <div style="display: flex;">
+        <!-- Drawing Area -->
+        <div id="drawingArea">
+            <canvas id="gridDrawing" width="500" height="500"></canvas>
+        </div>
+
+        <!-- Control Area -->
+        <div id="controlArea">
+            <!-- Control Buttons -->
+            <button id="mainBranchParent">mainBranchParent</button><br>
+            <button id="childBranchParent">childeBranchParent</button><br>
+            <button id="rectangle">rectangle</button><br>
+            <button id="treeBranch">treeBranch</button><br>
+            <button id="childBranch">childBranch</button><br><br><br>
+
+            <!-- Remove Button -->
+            <button id="clear">Clear selected</button><br><br>
+            <br />
+        </div>
+    </div>
+</body>
+
+<script>
+    function GridDrawing() {
+        var self = this;
+        self.UNIT = 10;
+        self.GRID_DIMENSIONS = 500;
+
+        self.boardCanvas;
+        self.selectedShape = null;
+
+        self.paintColor = {
+            'mainBranch': 'blue',
+            'childBranch': 'orange',
+            'rectangle': 'red',
+            'branch': 'red'
+        };
+        self.count = {
+            'rectangle': 0,
+            'childBranch': 0,
+            'childBranchParent': 0,
+            'treeBranch': 0,
+            'mainBranchParent': 0
+        }
+    }
+
+    GridDrawing.prototype.init = function (usedForReporting) {
+        var self = this;
+        self.boardCanvas = new fabric.Canvas('gridDrawing', { selection: false, preserveObjectStacking: true });
+
+        // snap to grid
+        self.boardCanvas.on('object:moving', function (options) {
+            self.moveShape(options.target, options.target.left, options.target.top);
+        });
+
+        self.boardCanvas.on('object:selected', function (options) {
+            var object = event.target;
+            self.boardCanvas.sendToBack(object);
+            self.selectedShape = options.target;
+        });
+
+        self.boardCanvas.on('mouse:down', function (options) {
+            var cellClickedLeft = Math.trunc(options.e.layerX / self.UNIT) * self.UNIT;
+            var cellClickedTop = Math.trunc(options.e.layerY / self.UNIT) * self.UNIT;
+
+            var object = options.target;
+            console.log('selected---', object);
+            if (object) {
+                self.boardCanvas.sendToBack(object);
+                self.selectedShape = options.target;
+                self.selectedShape.borderColor = 'blue';
+            }
+        });
+
+        $("#mainBranchParent").click(function () {
+            var shape = new fabric.Rect({
+                left: 4 * self.UNIT + self.UNIT * 12 * self.count.mainBranchParent,
+                top: 2 * self.UNIT,
+                width: self.UNIT * 12,
+                height: self.UNIT * 14,
+                paintFirst: 'stroke',
+                stroke: self.paintColor.mainBranch,
+                strokeWidth: 2,
+                fill: null
+            });
+            shape.setControlVisible('mtr', false);
+            self.count.mainBranchParent++;
+            self.boardCanvas.add(shape);
+            self.boardCanvas.renderAll();
+        });
+        $("#childBranchParent").click(function () {
+            var shape = new fabric.Rect({
+                left: 6 * self.UNIT,
+                top: 3 * self.UNIT + self.UNIT * 4 * self.count.childBranchParent,
+                width: self.UNIT * 9,
+                height: self.UNIT * 4,
+                paintFirst: 'stroke',
+                stroke: self.paintColor.childBranch,
+                strokeWidth: 2,
+                fill: null
+            });
+            shape.setControlVisible('mtr', false);
+            self.count.childBranchParent++;
+            self.boardCanvas.add(shape);
+            self.boardCanvas.renderAll();
+        });
+
+        $("#rectangle").click(function () {
+            var shape = new fabric.Rect({
+                left: 9 * self.UNIT,
+                top: 4 * self.UNIT + self.UNIT * 4 * self.count.rectangle,
+                width: self.UNIT * 4,
+                height: self.UNIT * 2,
+                paintFirst: 'stroke',
+                hasControls: false,
+                stroke: self.paintColor.rectangle,
+                strokeWidth: 2,
+                fill: null
+            });
+            self.count.rectangle++;
+            self.boardCanvas.add(shape);
+            self.boardCanvas.renderAll();
+        });
+
+        $("#treeBranch").click(function () {
+            var shape = new fabric.Line(
+                [
+                    5 * self.UNIT + self.UNIT * 12 * self.count.treeBranch,
+                    3 * self.UNIT,
+                    5 * self.UNIT + self.UNIT * 12 * self.count.treeBranch,
+                    15 * self.UNIT
+                ],
+                {
+                    stroke: self.paintColor.branch,
+                    strokeWidth: 2,
+                    padding: self.UNIT / 3
+                }
+            );
+            shape.setControlsVisibility({ 'tl': false, 'tr': false, 'br': false, 'bl': false, 'ml': false, 'mt': true, 'mr': false, 'mb': true, 'mtr': false });
+            self.count.treeBranch++;
+            self.boardCanvas.add(shape);
+            self.boardCanvas.renderAll();
+        });
+
+        $("#childBranch").click(function () {
+            var shape = new fabric.Line(
+                [
+                    5 * self.UNIT,
+                    5 * self.UNIT + self.UNIT * 4 * self.count.childBranch,
+                    9 * self.UNIT,
+                    5 * self.UNIT + self.UNIT * 4 * self.count.childBranch,
+                ],
+                {
+                    stroke: self.paintColor.branch,
+                    strokeWidth: 2,
+                    hasControls: false,
+                    padding: self.UNIT / 3
+                }
+            );
+            self.count.childBranch++;
+            self.boardCanvas.renderAll();
+            self.boardCanvas.add(shape);
+        });
+
+        $("#clear").click(function () {
+            self.boardCanvas.remove(self.selectedShape);
+            self.boardCanvas.renderAll();
+        });
+
+
+        // Draw Gridline
+        var linesCount = self.GRID_DIMENSIONS / self.UNIT;
+        for (var lineIndex = 0; lineIndex < linesCount; lineIndex += 2) {
+            self.boardCanvas.add(new fabric.Line([lineIndex * self.UNIT, 0, lineIndex * self.UNIT, self.GRID_DIMENSIONS], { stroke: '#ccc', selectable: false }));
+            self.boardCanvas.add(new fabric.Line([0, lineIndex * self.UNIT, self.GRID_DIMENSIONS, lineIndex * self.UNIT], { stroke: '#ccc', selectable: false }));
+        }
+    }
+
+    GridDrawing.prototype.moveShape = function (shape, left, top) {
+        var self = this;
+        var gridFittedCoordinates = self.getScaledCellCoordinates(left, top);
+        if (gridFittedCoordinates.left < 0) {
+            gridFittedCoordinates.left = 0;
+        }
+        if (gridFittedCoordinates.top < 0) {
+            gridFittedCoordinates.top = 0;
+        }
+        if ((gridFittedCoordinates.left + self.UNIT) >= self.boardCanvas.width) {
+            gridFittedCoordinates.left = self.boardCanvas.width - self.UNIT;
+        }
+        if ((gridFittedCoordinates.top + self.UNIT) >= self.boardCanvas.height) {
+            gridFittedCoordinates.top = self.boardCanvas.height - self.UNIT;
+        }
+
+        shape.set({
+            left: gridFittedCoordinates.left,
+            top: gridFittedCoordinates.top
+        });
+    }
+
+    GridDrawing.prototype.addShapeOnGrid = function (left, top, type) {
+        var self = this;
+        var shape = null;
+
+        var shape = new fabric.Rect({
+            left: 0,
+            top: 0,
+            width: self.UNIT * 6,
+            height: self.UNIT * 8,
+            paintFirst: 'stroke',
+            stroke: self.parentColor,
+            strokeWidth: 2,
+            fill: null,
+            originX: 'left',
+            originY: 'top',
+        });
+
+        var parentBranch = new fabric.Line([self.UNIT / 2, 0, self.UNIT / 2, shape.height], { stroke: self.branchColor, selectable: false, strokeWidth: 2 });
+
+        children = new fabric.Group([], {
+            left: self.UNIT,
+            top: top,
+        });
+
+        var group = new fabric.Group([shape, parentBranch, children], {
+            left: left,
+            top: top,
+            hasControls: false,
+            padding: self.UNIT / 2,
+            hasRotatingPoint: false,
+        });
+        self.boardCanvas.add(group);
+        self.boardCanvas.renderAll();
+    }
+
+
+    GridDrawing.prototype.getScaledCellCoordinates = function (left, top) {
+        var self = this;
+        var squaredCoordinates = {};
+        squaredCoordinates.left = Math.ceil(left / self.UNIT) * self.UNIT;
+        squaredCoordinates.top = Math.ceil(top / self.UNIT) * self.UNIT;
+        return squaredCoordinates;
+    }
+
+    var map = new GridDrawing();
+    map.init(false);
+
+    document.onkeydown = function (e) {
+        if (map.selectedShape) {
+            var selected = map.selectedShape;
+            var top = map.selectedShape.top;
+            var left = map.selectedShape.left;
+            switch (e.keyCode) {
+                case 38:  /* Up arrow was pressed */
+                    map.moveShape(selected, left, top - map.UNIT);
+                    break;
+                case 40:  /* Down arrow was pressed */
+                    map.moveShape(selected, left, top + map.UNIT);
+                    break;
+                case 37:  /* Left arrow was pressed */
+                    map.moveShape(selected, left - map.UNIT, top);
+                    break;
+                case 39:  /* Right arrow was pressed */
+                    map.moveShape(selected, left + map.UNIT, top);
+                    break;
+            }
+            map.boardCanvas.renderAll();
+        }
+    }
+
+</script>
+
+</html>
